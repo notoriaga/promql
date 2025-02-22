@@ -13,14 +13,14 @@ See [official documentation](https://prometheus.io/docs/prometheus/latest/queryi
 use promql::*;
 
 let opts = ParserOptions::new()
-	.allow_dots(false)
-	.build();
+    .allow_dots(false)
+    .build();
 
 // query can also be `&str`
 let query: &[u8] = br#"
-	sum(1 - something_used{env="production"} / something_total) by (instance)
-	and ignoring (instance)
-	sum(rate(some_queries{instance=~"localhost\\d+"} [5m])) > 100
+    sum(1 - something_used{env="production"} / something_total) by (instance)
+    and ignoring (instance)
+    sum(rate(some_queries{instance=~"localhost\\d+"} [5m])) > 100
 "#;
 let ast = parse(query, &opts).unwrap(); // or show user that their query is invalid
 
@@ -28,25 +28,25 @@ let ast = parse(query, &opts).unwrap(); // or show user that their query is inva
 
 // AST can represent an operator
 if let Node::Operator { op: Op::And(op_mod), args } = ast {
-	// operators can have modifiers
-	assert_eq!(op_mod, Some(OpMod {
-		action: OpModAction::Ignore,
-		labels: vec!["instance".to_string()],
-		group: None,
-	}));
+    // operators can have modifiers
+    assert_eq!(op_mod, Some(OpMod {
+        action: OpModAction::Ignore,
+        labels: vec!["instance".to_string()],
+        group: None,
+    }));
 
-	// aggregation functions like sum are represented as functions with optional modifiers (`by (label1, …)`/`without (…)`)
-	if let Node::Function { ref name, ref aggregation, ref args } = args[0] {
-		assert_eq!(*name, "sum".to_string());
-		assert_eq!(*aggregation, Some(AggregationMod {
-			action: AggregationAction::By,
-			labels: vec!["instance".to_string()],
-		}));
+    // aggregation functions like sum are represented as functions with optional modifiers (`by (label1, …)`/`without (…)`)
+    if let Node::Function { ref name, ref aggregation, ref args } = args[0] {
+        assert_eq!(*name, "sum".to_string());
+        assert_eq!(*aggregation, Some(AggregationMod {
+            action: AggregationAction::By,
+            labels: vec!["instance".to_string()],
+        }));
 
-		// …
-	}
+        // …
+    }
 } else {
-	panic!("top operator is not an 'and'");
+    panic!("top operator is not an 'and'");
 }
 
 # }
@@ -95,15 +95,15 @@ When writing tests, write three versions of queries:
 
 pub(crate) mod expr;
 pub(crate) mod str;
-pub(crate) mod vec;
 pub(crate) mod utils;
+pub(crate) mod vec;
 pub(crate) mod whitespace;
 
 pub use expr::*;
 pub use vec::*;
 
-use nom::Err;
 use nom::error::VerboseError;
+use nom::Err;
 
 extern crate builder_pattern;
 use builder_pattern::Builder;
@@ -111,86 +111,80 @@ use builder_pattern::Builder;
 /// Options that allow or disallow certain query language features.
 #[derive(Clone, Copy, Builder)]
 pub struct ParserOptions {
-	/**
-	Allow dots in metric names (e.g. `threads.busy{instance="..."}`).
+    /**
+    Allow dots in metric names (e.g. `threads.busy{instance="..."}`).
 
-	This option is usually used in systems that have metrics carried over from other monitoring systems like Graphite.
-	*/
-	#[default(false)]
-	allow_dots: bool,
+    This option is usually used in systems that have metrics carried over from other monitoring systems like Graphite.
+    */
+    #[default(false)]
+    allow_dots: bool,
 
-	/// Allow decimal fractions in intervals (e.g. `offset 0.5d`)
-	#[default(false)]
-	fractional_intervals: bool,
+    /// Allow decimal fractions in intervals (e.g. `offset 0.5d`)
+    #[default(false)]
+    fractional_intervals: bool,
 
-	/// Allow compound interval literals (e.g. `offset 1h30m`)
-	#[default(false)]
-	compound_intervals: bool,
+    /// Allow compound interval literals (e.g. `offset 1h30m`)
+    #[default(false)]
+    compound_intervals: bool,
 
-	/// Allow negative offsets
-	#[default(false)]
-	negative_offsets: bool,
+    /// Allow negative offsets
+    #[default(false)]
+    negative_offsets: bool,
 
-	/// Allow `ms` as an interval suffix
-	#[default(false)]
-	ms_duration: bool,
+    /// Allow `ms` as an interval suffix
+    #[default(false)]
+    ms_duration: bool,
 
-	/// Allow `#`-prefixed comments
-	#[default(true)]
-	comments: bool,
+    /// Allow `#`-prefixed comments
+    #[default(true)]
+    comments: bool,
 
-	/// How many `Node`-producing expressions and unary operators can be nested into each other
-	// affects expr::{expression, atom}
-	#[default(64)]
-	recursion_limit: usize,
+    /// How many `Node`-producing expressions and unary operators can be nested into each other
+    // affects expr::{expression, atom}
+    #[default(64)]
+    recursion_limit: usize,
 }
 
 impl Default for ParserOptions {
-	fn default() -> Self {
-		ParserOptions::new().build()
-	}
+    fn default() -> Self {
+        ParserOptions::new().build()
+    }
 }
 
 /// Parse expression string into an AST.
 pub fn parse<I, C>(e: I, opts: &ParserOptions) -> Result<Node, Err<VerboseError<I>>>
 where
-	I: Clone + Copy
-		+ nom::AsBytes
-		+ nom::Compare<&'static str>
-		+ for<'a> nom::Compare<&'a [u8]>
-		+ nom::InputIter<Item = C>
-		+ nom::InputLength
-		+ nom::InputTake
-		+ nom::InputTakeAtPosition<Item = C>
-		+ nom::Offset
-		+ nom::Slice<std::ops::Range<usize>>
-		+ nom::Slice<std::ops::RangeFrom<usize>>
-		+ nom::Slice<std::ops::RangeTo<usize>>
-		+ nom::ParseTo<f32>
-		,
-	C: nom::AsChar + Clone + Copy,
-	&'static str: nom::FindToken<C>,
-	<I as nom::InputIter>::IterElem: Clone,
+    I: Clone
+        + Copy
+        + nom::AsBytes
+        + nom::Compare<&'static str>
+        + for<'a> nom::Compare<&'a [u8]>
+        + nom::InputIter<Item = C>
+        + nom::InputLength
+        + nom::InputTake
+        + nom::InputTakeAtPosition<Item = C>
+        + nom::Offset
+        + nom::Slice<std::ops::Range<usize>>
+        + nom::Slice<std::ops::RangeFrom<usize>>
+        + nom::Slice<std::ops::RangeTo<usize>>
+        + nom::ParseTo<f32>,
+    C: nom::AsChar + Clone + Copy,
+    &'static str: nom::FindToken<C>,
+    <I as nom::InputIter>::IterElem: Clone,
 {
-	nom::combinator::all_consuming(|i| expression(0, i, opts))(e)
-		.map(|(_, ast)| ast)
+    nom::combinator::all_consuming(|i| expression(0, i, opts))(e).map(|(_, ast)| ast)
 }
 
 #[cfg(test)]
 mod tests {
-	use nom::error::{
-		ErrorKind,
-		VerboseErrorKind,
-	};
-	use crate::utils::tests::*;
+    use crate::utils::tests::*;
+    use nom::error::{ErrorKind, VerboseErrorKind};
 
-	#[test]
-	fn completeness() {
-		assert_eq!(
-			super::parse(&b"asdf hjkl"[..], &Default::default()),
-			err(vec![
-				(&b"hjkl"[..], VerboseErrorKind::Nom(ErrorKind::Eof)),
-			])
-		);
-	}
+    #[test]
+    fn completeness() {
+        assert_eq!(
+            super::parse(&b"asdf hjkl"[..], &Default::default()),
+            err(vec![(&b"hjkl"[..], VerboseErrorKind::Nom(ErrorKind::Eof)),])
+        );
+    }
 }
