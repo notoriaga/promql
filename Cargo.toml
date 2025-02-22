@@ -1,20 +1,15 @@
 [package]
 name = "promql"
-description = "PromQL parser"
 version = "0.5.0"
-authors = ["vthriller <unixway.drive+rs@gmail.com>"]
-license = "Apache-2.0"
-repository = "https://github.com/vthriller/promql"
+edition = "2024"
 
 [dependencies]
 quick-error = "2.0"
 nom = "7.0"
 builder-pattern = "0.3"
-
-# feature: serializable
 serde = { version = "1.0", optional = true }
 serde_derive = { version = "1.0", optional = true }
 
 [features]
 default = []
-serializable = ["serde", "serde_derive"]
+serde = ["dep:serde", "dep:serde_derive"]

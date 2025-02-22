@@ -57,8 +57,6 @@ if let Node::Operator { op: Op::And(op_mod), args } = ast {
 This parser emits `Vec<u8>` for most string literals because PromQL, like Go, allows raw byte sequences to be included in the string literals (e.g. `{omg='∞'}` is equivalent to both `{omg='\u221e'}` and `{omg='\xe2\x88\x9e'}`).
 */
 
-#![cfg_attr(feature = "cargo-clippy", allow(clippy::tabs_in_doc_comments))]
-
 extern crate nom;
 #[macro_use]
 extern crate quick_error;
