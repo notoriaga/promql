@@ -94,11 +94,11 @@ When writing tests, write three versions of queries:
 pub(crate) mod expr;
 pub(crate) mod str;
 pub(crate) mod utils;
-pub(crate) mod vec;
+pub(crate) mod vector;
 pub(crate) mod whitespace;
 
 pub use expr::*;
-pub use vec::*;
+pub use vector::*;
 
 use nom::error::VerboseError;
 use nom::Err;

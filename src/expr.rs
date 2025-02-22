@@ -1,6 +1,6 @@
 use crate::str::string;
 use crate::utils::{IResult, delimited_ws, value};
-use crate::vec::{Vector, label_name, vector};
+use crate::vector::{Vector, label_name, vector};
 use crate::whitespace::{surrounded_ws_or_comment, ws_or_comment};
 use crate::{ParserOptions, tuple_separated};
 use nom::branch::alt;
@@ -17,7 +17,7 @@ use nom::{
 use std::ops::{Range, RangeFrom, RangeTo};
 
 /// PromQL operators
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde_derive::Serialize))]
 pub enum Op {
     /** `^` */
@@ -57,14 +57,14 @@ pub enum Op {
     Or(Option<OpMod>),
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde_derive::Serialize))]
 pub enum OpModAction {
     RestrictTo,
     Ignore,
 }
 /// Vector matching operator modifier (`on (…)`/`ignoring (…)`).
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde_derive::Serialize))]
 pub struct OpMod {
     /// Action applied to a list of vectors; whether `on (…)` or `ignored(…)` is used after the operator.
@@ -75,27 +75,27 @@ pub struct OpMod {
     pub group: Option<OpGroupMod>,
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde_derive::Serialize))]
 pub enum OpGroupSide {
     Left,
     Right,
 }
 /// Vector grouping operator modifier (`group_left(…)`/`group_right(…)`).
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde_derive::Serialize))]
 pub struct OpGroupMod {
     pub side: OpGroupSide,
     pub labels: Vec<String>,
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde_derive::Serialize))]
 pub enum AggregationAction {
     Without,
     By,
 }
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde_derive::Serialize))]
 pub struct AggregationMod {
     // Action applied to a list of vectors; whether `by (…)` or `without (…)` is used.
@@ -104,7 +104,7 @@ pub struct AggregationMod {
 }
 
 /// AST node.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde_derive::Serialize))]
 pub enum Node {
     /// Chain of operators with similar mods: `a + ignoring (foo) b + ignoring (foo) c`
@@ -669,7 +669,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::vec;
+    use crate::vector;
 
     use self::Node::{Function, Scalar};
     use self::Op::*;
@@ -688,7 +688,7 @@ mod tests {
 
     // vector parsing is already tested in `mod vec`, so use that parser instead of crafting lengthy structs all over the test functions
     fn vector(expr: &str) -> Node {
-        match vec::vector(expr, &ParserOptions::default()) {
+        match vector::vector(expr, &ParserOptions::default()) {
             Ok(("", x)) => Node::Vector(x),
             _ => panic!("failed to parse label correctly"),
         }

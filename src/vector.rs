@@ -1,7 +1,7 @@
 use crate::str::string;
-use crate::utils::{delimited_ws, surrounded_ws, value, IResult};
+use crate::utils::{IResult, delimited_ws, surrounded_ws, value};
 use crate::whitespace::ws_or_comment;
-use crate::{tuple_separated, ParserOptions};
+use crate::{ParserOptions, tuple_separated};
 use nom::branch::alt;
 use nom::bytes::complete::{is_a, tag};
 use nom::character::complete::{alpha1, alphanumeric1, char, digit1, multispace0};
@@ -29,7 +29,7 @@ pub enum LabelMatchOp {
 }
 
 /// Single label filter.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde_derive::Serialize))]
 pub struct LabelMatch {
     pub name: String,
@@ -94,7 +94,7 @@ assert_eq!(
 # }
 ```
 */
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde_derive::Serialize))]
 pub struct Vector {
     /// Set of label filters

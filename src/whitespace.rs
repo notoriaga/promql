@@ -67,7 +67,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::vec;
+    use crate::vector;
 
     use nom::error::{VerboseError, VerboseErrorKind};
 
